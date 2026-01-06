@@ -1,57 +1,71 @@
-import { GoogleGenAI, Chat, Content, GenerateContentResponse } from "@google/genai";
+
+import { GoogleGenAI, Chat, Content } from "@google/genai";
 import { ProcessedFile } from "../types";
 
 let chatSession: Chat | null = null;
 
-export const initializeChatSession = (files: ProcessedFile[], history?: Content[]): void => {
+/**
+ * Initializes the chat session with the provided documents as context.
+ */
+export const initializeChatSession = (files: ProcessedFile[], history?: Content[]) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey || apiKey === "undefined") {
+      throw new Error("API Key is missing. Set VITE_API_KEY in your environment.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     
     const fileContext = files.map((file, index) => `
-DOCUMENT ${index + 1} START
-Name: ${file.name}
-Content:
+--- DOCUMENT ${index + 1}: ${file.name} ---
 ${file.content}
-DOCUMENT ${index + 1} END
+--- END OF DOCUMENT ${index + 1} ---
 `).join('\n\n');
 
     const systemInstruction = `
-      You are an expert Document Analysis AI. 
-      Answer questions based ONLY on the following documents.
-      Always cite document names using [Filename].
-      Use Markdown for formatting.
+      You are a specialized Document Analysis Assistant. 
+      Answer questions based ONLY on the provided document content.
+      Always cite the document name.
+      If information is missing, say you don't know based on these files.
       
-      CONTEXT:
+      DOCUMENTS:
       ${fileContext}
     `;
 
     chatSession = ai.chats.create({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction,
+        systemInstruction: systemInstruction,
         temperature: 0.2,
       },
       history: history || []
     });
-  } catch (error) {
-    console.error("Gemini Init Error:", error);
-    throw new Error("AI Session failed to start.");
+
+    return true;
+  } catch (error: any) {
+    console.error("Initialization error:", error);
+    throw error;
   }
 };
 
+/**
+ * Sends a user message and streams the response.
+ */
 export const sendMessageStream = async function* (message: string): AsyncGenerator<string, void, unknown> {
-  if (!chatSession) throw new Error("No active session.");
+  if (!chatSession) {
+    throw new Error("Session not initialized.");
+  }
 
   try {
     const responseStream = await chatSession.sendMessageStream({ message });
     for await (const chunk of responseStream) {
-      const typedChunk = chunk as GenerateContentResponse;
-      if (typedChunk.text) {
-        yield typedChunk.text;
+      if (chunk.text) {
+        yield chunk.text;
       }
     }
   } catch (error: any) {
-    console.error("Gemini Error:", error);
-    throw new Error("Failed to get response from AI.");
+    console.error("Chat error:", error);
+    throw new Error(error.message || "AI failed to respond.");
   }
 };
