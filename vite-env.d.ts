@@ -1,16 +1,21 @@
 
-// Augment the existing NodeJS namespace to include API_KEY in ProcessEnv
+interface ImportMetaEnv {
+  readonly API_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+// Augment the existing NodeJS namespace to include API_KEY in process.env
+// This avoids "Subsequent variable declarations" and "Cannot redeclare" errors by 
+// extending the existing Process types instead of trying to override the variable declaration.
 declare namespace NodeJS {
   interface ProcessEnv {
     API_KEY: string;
+    [key: string]: string | undefined;
   }
 }
-
-/**
- * Fix: Removed redundant 'declare var process' which caused a naming conflict.
- * The NodeJS.ProcessEnv interface augmentation above is sufficient for 
- * process.env type safety when Node.js types are present.
- */
 
 declare module 'react-markdown' {
   import { FC, ReactNode } from 'react';

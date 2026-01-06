@@ -81,12 +81,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, isProcessing, o
                   {msg.role === 'model' ? (
                     <ReactMarkdown 
                       components={{
-                        p: (props: any) => <p className="mb-2 last:mb-0" {...props} />,
-                        ul: (props: any) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                        ol: (props: any) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                        li: (props: any) => <li className="mb-1" {...props} />,
-                        strong: (props: any) => <strong className="font-bold text-slate-900" {...props} />,
-                        code: ({ className, children, ...props }: any) => {
+                        p: ({node, ...props}: any) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({node, ...props}: any) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                        ol: ({node, ...props}: any) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                        li: ({node, ...props}: any) => <li className="mb-1" {...props} />,
+                        strong: ({node, ...props}: any) => <strong className="font-bold text-slate-900" {...props} />,
+                        code: ({node, className, children, ...props}: any) => {
                            const match = /language-(\w+)/.exec(className || '')
                            return !match ? (
                              <code className="bg-slate-100 text-pink-600 px-1 py-0.5 rounded text-xs font-mono" {...props}>
