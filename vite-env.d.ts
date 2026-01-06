@@ -1,24 +1,23 @@
-/// <reference types="vite/client" />
 
-declare module 'react-dom/client' {
-  import { ReactNode } from 'react';
-  export interface Root {
-    render(children: ReactNode): void;
-    unmount(): void;
+// Augment the existing NodeJS namespace to include API_KEY in ProcessEnv
+declare namespace NodeJS {
+  interface ProcessEnv {
+    API_KEY: string;
   }
-  export function createRoot(container: Element | DocumentFragment): Root;
 }
+
+/**
+ * Fix: Removed redundant 'declare var process' which caused a naming conflict.
+ * The NodeJS.ProcessEnv interface augmentation above is sufficient for 
+ * process.env type safety when Node.js types are present.
+ */
 
 declare module 'react-markdown' {
-  import { FC } from 'react';
-  const ReactMarkdown: FC<any>;
+  import { FC, ReactNode } from 'react';
+  interface ReactMarkdownProps {
+    children: string;
+    components?: Record<string, FC<any>>;
+  }
+  const ReactMarkdown: FC<ReactMarkdownProps>;
   export default ReactMarkdown;
-}
-
-interface ImportMetaEnv {
-  readonly API_KEY: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
 }

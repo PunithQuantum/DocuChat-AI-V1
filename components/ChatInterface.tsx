@@ -22,7 +22,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, isProcessing, o
     scrollToBottom();
   }, [messages, isProcessing]);
 
-  // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -42,13 +41,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, isProcessing, o
     }
   };
 
-  // Only show loader if processing AND the last message is from user (meaning we haven't started streaming the bot response yet)
   const showLoader = isProcessing && messages.length > 0 && messages[messages.length - 1].role === 'user';
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-5xl mx-auto bg-white shadow-xl sm:rounded-xl sm:my-4 sm:h-[calc(100vh-96px)] overflow-hidden border border-slate-200">
-      
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50 scroll-smooth">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
@@ -85,13 +81,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, isProcessing, o
                   {msg.role === 'model' ? (
                     <ReactMarkdown 
                       components={{
-                        // Tailor markdown rendering for the chat bubble
-                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />,
-                        code: ({node, className, children, ...props}) => {
+                        p: (props: any) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: (props: any) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                        ol: (props: any) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                        li: (props: any) => <li className="mb-1" {...props} />,
+                        strong: (props: any) => <strong className="font-bold text-slate-900" {...props} />,
+                        code: ({ className, children, ...props }: any) => {
                            const match = /language-(\w+)/.exec(className || '')
                            return !match ? (
                              <code className="bg-slate-100 text-pink-600 px-1 py-0.5 rounded text-xs font-mono" {...props}>
@@ -134,7 +129,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, isProcessing, o
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="bg-white p-4 border-t border-slate-200">
         <form onSubmit={handleSubmit} className="relative flex items-end gap-2 max-w-4xl mx-auto">
           <div className="relative flex-1 bg-slate-100 rounded-2xl border border-slate-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
